@@ -1,0 +1,107 @@
+#!/bin/bash 
+
+while true; do
+    echo "1. Add Course"
+    echo "2. Modify Course"
+    echo "3. Search Courses"
+    echo "4. Print Courses"
+    echo -n "Please Select your choice (1-4):"
+    read choice
+
+    case $choice in
+        1)
+            echo "---------------------------------------------------------"
+            echo
+            
+            echo -n "Please enter Course ID: "
+            read course_id
+            while [[ ! $course_id =~ ^[a-z]{4}[0-9]{3}$ ]]; do
+                echo -n "Invalid Course ID. Please re-enter Course ID: "
+                read course_id
+            done
+
+            echo -n "Enter Full Name: "
+            read full_name
+
+            echo -n "Enter Book ISBN: "
+            read isbn
+            while [[ ! $isbn =~ ^[0-9]{2}-[0-9]{3}-[0-9]{5}$ ]]; do
+                echo "Invalid ISBN format. Please re-enter Book ISBN again: "
+                read isbn
+            done
+
+            echo "$course_id, $full_name, $isbn" >>courses
+            echo "Course "$full_name" added successfully."
+            
+            echo "---------------------------------------------------------"
+            ;;
+
+        2)
+            echo "---------------------------------------------------------"
+            echo
+            
+            echo -n "Enter Course ID to modify/delete: "
+            read course_id
+            grep -q "^$course_id" courses
+            if [ $? -eq 0 ]; then
+                echo "Choose an option:"
+                echo "1. Delete Course"
+                echo "2. Modify Course"
+                echo -n "Enter your choice: "
+                read modify_choice
+
+                case $modify_choice in
+                    1)
+                        sed -i "/^$course_id/d" courses
+                        echo "Course deleted successfully."
+                        ;;
+                    2)
+                        echo -n "Enter new ISBN: "
+		        read new_isbn
+		        while [[ ! $new_isbn =~ ^[0-9]{2}-[0-9]{3}-[0-9]{5}$ ]]; do
+		            echo -n "Invalid ISBN format. Enter new ISBN again: "
+		            read new_isbn
+		        done
+		        sed -i "s/\(.*,\)\([^,]*\)$/\1$new_isbn/" courses
+		        echo "Course modified successfully."
+		        ;;
+                    *)
+                        echo "Invalid choice. No modifications made."
+                        ;;
+                esac
+            else
+                echo "Course not found."
+            fi
+            echo "---------------------------------------------------------"
+            ;;
+
+        3)
+            echo "---------------------------------------------------------"
+            echo
+            
+	    echo -n "Enter Course ID to search: "
+	    read course_id
+	    
+	    grep -q "^$course_id" courses
+	    
+	    if [ $? -ne 0 ]; then
+		echo "Course not found."
+	    fi
+	    echo "---------------------------------------------------------"
+	    ;;
+        4)
+            echo "---------------------------------------------------------"
+            echo
+            
+            cat courses
+            echo "---------------------------------------------------------"
+            ;;
+        *)
+            echo "Invalid choice. Please try again."
+            ;;
+    esac
+    
+    echo "---------------------------------------------------------"
+    echo
+    
+done
